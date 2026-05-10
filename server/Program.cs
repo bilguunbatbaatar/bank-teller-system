@@ -1,5 +1,10 @@
+using Microsoft.EntityFrameworkCore;
+using server.Data;
 var builder = WebApplication.CreateBuilder(args);
-
+// Enendeer anhaaral handuulaarai! ( guur bolj ugch baigaa server, db hoyriin hoorond)
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
 // Add services to the container.
 
 builder.Services.AddControllers();
