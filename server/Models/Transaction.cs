@@ -1,14 +1,21 @@
-﻿namespace server.Models;
+﻿using server.Enums;
+
+namespace server.Models;
 
 public class Transaction
 {
     public int Id { get; set; }
 
-    public int FromAccountId { get; set; }
+    public string FromAccountNumber { get; set; }
+        = string.Empty;
 
-    public int ToAccountId { get; set; }
+    public string ToAccountNumber { get; set; }
+        = string.Empty;
 
     public decimal Amount { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public TransactionType Type { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+        = DateTime.UtcNow;
 }

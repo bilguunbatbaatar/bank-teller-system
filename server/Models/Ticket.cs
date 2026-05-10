@@ -1,3 +1,5 @@
+using server.Enums;
+
 namespace server.Models;
 
 public class Ticket
@@ -6,9 +8,13 @@ public class Ticket
 
     public string Number { get; set; } = string.Empty;
 
-    public string Status { get; set; } = "Waiting";
+    public TicketStatus Status { get; set; }
+        = TicketStatus.Waiting;
 
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; }
+        = DateTime.UtcNow;
 
     public DateTime? CalledAt { get; set; }
+
+    public DateTime? CompletedAt { get; set; }
 }
