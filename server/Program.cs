@@ -1,19 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using server.Data;
+
 var builder = WebApplication.CreateBuilder(args);
-// Enendeer anhaaral handuulaarai! ( guur bolj ugch baigaa server, db hoyriin hoorond)
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
-// Add services to the container.
+    options.UseSqlite("Data Source=BankTeller.db"));
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
