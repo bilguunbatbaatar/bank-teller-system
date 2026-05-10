@@ -9,6 +9,7 @@ namespace server.Controllers;
 [Route("api/[controller]")]
 public class TicketController : ControllerBase
 {
+    private static readonly Lock _ticketLock = new();
     private readonly AppDbContext _context;
 
     public TicketController(AppDbContext context)
@@ -31,5 +32,26 @@ public class TicketController : ControllerBase
         await _context.SaveChangesAsync();
 
         return ticket;
+    }
+    [HttpPost("next")]
+    public ActionResult<Ticket> Next()
+    {
+        lock (_ticketLock)
+        {
+            var ticket = _context.Tickets
+                .FirstOrDefault(x => x.Status == "Waiting");
+
+            if (ticket == null)
+            {
+                return NotFound();
+            }
+
+            ticket.Status = "Called";
+            ticket.CalledAt = DateTime.Now;
+
+            _context.SaveChanges();
+
+            return ticket;
+        }
     }
 }
