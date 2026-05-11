@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "server\\server.csproj",
+        "Action": "StartWithoutDebugging"
+      },
+      {
+        "Path": "queue-display\\queue-display.csproj",
+        "Action": "StartWithoutDebugging"
+      }
+    ]
+  }
+]

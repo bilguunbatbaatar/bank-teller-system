@@ -4,6 +4,7 @@ namespace server.Models;
 
 public class Ticket
 {
+
     public int Id { get; set; }
 
     public string Number { get; set; }

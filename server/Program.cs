@@ -1,11 +1,14 @@
 using Microsoft.EntityFrameworkCore;
-
+using server.Services;
 using server.Data;
 
 var builder =
     WebApplication.CreateBuilder(
         args);
 
+builder.Services
+    .AddSingleton<
+        QueueSocketService>();
 builder.Services
     .AddDbContext<AppDbContext>(
         options =>
@@ -40,6 +43,9 @@ builder.Services
 
 var app =
     builder.Build();
+app.Services
+    .GetRequiredService<
+        QueueSocketService>();
 
 if (app.Environment
     .IsDevelopment())

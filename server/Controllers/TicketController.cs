@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+using server.Services;
 using server.Data;
 using server.Enums;
 using server.Models;
@@ -11,18 +12,28 @@ namespace server.Controllers;
 [Route("api/[controller]")]
 public class TicketController : ControllerBase
 {
-    private static readonly Lock _ticketLock = new();
+    private static readonly Lock _ticketLock =
+        new();
 
-    private readonly AppDbContext _context;
+    private readonly
+        QueueSocketService
+        _socket;
+
+    private readonly
+        AppDbContext
+        _context;
 
     public TicketController(
-        AppDbContext context)
+        AppDbContext context,
+        QueueSocketService socket)
     {
         _context = context;
+        _socket = socket;
     }
 
     [HttpPost]
-    public ActionResult<Ticket> Create()
+    public ActionResult<Ticket>
+        Create()
     {
         lock (_ticketLock)
         {
@@ -47,6 +58,8 @@ public class TicketController : ControllerBase
     public ActionResult<Ticket>
         Next(int tellerNumber)
     {
+        Ticket? ticket;
+
         lock (_ticketLock)
         {
             var activeTicket =
@@ -63,7 +76,7 @@ public class TicketController : ControllerBase
                     $"Teller {tellerNumber} already has an active ticket.");
             }
 
-            var ticket =
+            ticket =
                 _context.Tickets
                     .OrderBy(x => x.Id)
                     .FirstOrDefault(x =>
@@ -85,18 +98,22 @@ public class TicketController : ControllerBase
                 DateTime.UtcNow;
 
             _context.SaveChanges();
-
-            return ticket;
         }
+
+        BroadcastQueue();
+
+        return ticket;
     }
 
     [HttpPost("complete/{tellerNumber}")]
     public ActionResult<Ticket>
         Complete(int tellerNumber)
     {
+        Ticket? ticket;
+
         lock (_ticketLock)
         {
-            var ticket =
+            ticket =
                 _context.Tickets
                     .FirstOrDefault(x =>
                         x.Status ==
@@ -116,18 +133,22 @@ public class TicketController : ControllerBase
                 DateTime.UtcNow;
 
             _context.SaveChanges();
-
-            return ticket;
         }
+
+        BroadcastQueue();
+
+        return ticket;
     }
 
     [HttpPost("cancel/{tellerNumber}")]
     public ActionResult<Ticket>
         Cancel(int tellerNumber)
     {
+        Ticket? ticket;
+
         lock (_ticketLock)
         {
-            var ticket =
+            ticket =
                 _context.Tickets
                     .FirstOrDefault(x =>
                         x.Status ==
@@ -144,9 +165,11 @@ public class TicketController : ControllerBase
                 TicketStatus.Cancelled;
 
             _context.SaveChanges();
-
-            return ticket;
         }
+
+        BroadcastQueue();
+
+        return ticket;
     }
 
     [HttpGet("current")]
@@ -163,5 +186,26 @@ public class TicketController : ControllerBase
                 .ToList();
 
         return tickets;
+    }
+
+    private void
+        BroadcastQueue()
+    {
+        var message =
+            string.Join(
+                Environment.NewLine,
+                _context.Tickets
+                    .Where(x =>
+                        x.Status ==
+                        TicketStatus.Called)
+                    .OrderBy(x =>
+                        x.TellerNumber)
+                    .Select(x =>
+                        $"Teller {x.TellerNumber} => {x.Number}"));
+        
+        _socket
+            .Broadcast(
+                message)
+            .Wait();
     }
 }

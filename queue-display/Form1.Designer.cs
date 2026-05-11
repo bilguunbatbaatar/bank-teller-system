@@ -1,4 +1,4 @@
-﻿namespace terminal_app
+﻿namespace queue_display
 {
     partial class Form1
     {
@@ -28,36 +28,46 @@
         /// </summary>
         private void InitializeComponent()
         {
-            btnTakeTicket = new Button();
-            lblTicket = new Label();
+            lblTeller1 = new Label();
+            lblTeller2 = new Label();
+            lblTeller3 = new Label();
             SuspendLayout();
             // 
-            // btnTakeTicket
+            // lblTeller1
             // 
-            btnTakeTicket.Location = new Point(333, 129);
-            btnTakeTicket.Name = "btnTakeTicket";
-            btnTakeTicket.Size = new Size(150, 46);
-            btnTakeTicket.TabIndex = 0;
-            btnTakeTicket.Text = "Take Ticket";
-            btnTakeTicket.UseVisualStyleBackColor = true;
-            btnTakeTicket.Click += btnTakeTicket_Click;
+            lblTeller1.AutoSize = true;
+            lblTeller1.Location = new Point(23, 35);
+            lblTeller1.Name = "lblTeller1";
+            lblTeller1.Size = new Size(156, 32);
+            lblTeller1.TabIndex = 0;
+            lblTeller1.Text = "TELLER 1 : ---\n";
             // 
-            // lblTicket
+            // lblTeller2
             // 
-            lblTicket.AutoSize = true;
-            lblTicket.Location = new Point(381, 205);
-            lblTicket.Name = "lblTicket";
-            lblTicket.Size = new Size(44, 32);
-            lblTicket.TabIndex = 1;
-            lblTicket.Text = "---";
+            lblTeller2.AutoSize = true;
+            lblTeller2.Location = new Point(320, 35);
+            lblTeller2.Name = "lblTeller2";
+            lblTeller2.Size = new Size(156, 32);
+            lblTeller2.TabIndex = 1;
+            lblTeller2.Text = "TELLER 2 s: ---\n";
+            // 
+            // lblTeller3
+            // 
+            lblTeller3.AutoSize = true;
+            lblTeller3.Location = new Point(578, 35);
+            lblTeller3.Name = "lblTeller3";
+            lblTeller3.Size = new Size(156, 32);
+            lblTeller3.TabIndex = 2;
+            lblTeller3.Text = "TELLER 3 : ---\n";
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(13F, 32F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(lblTicket);
-            Controls.Add(btnTakeTicket);
+            Controls.Add(lblTeller3);
+            Controls.Add(lblTeller2);
+            Controls.Add(lblTeller1);
             Name = "Form1";
             Text = "Form1";
             ResumeLayout(false);
@@ -66,7 +76,8 @@
 
         #endregion
 
-        private Button btnTakeTicket;
-        private Label lblTicket;
+        private Label lblTeller1;
+        private Label lblTeller2;
+        private Label lblTeller3;
     }
 }
