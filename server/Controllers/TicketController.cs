@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using server.Data;
 using server.Enums;
 using server.Models;
+using Microsoft.AspNetCore.SignalR;
+using server.Hubs;
 
 namespace server.Controllers;
 
@@ -13,10 +15,16 @@ public class TicketController : ControllerBase
     private static readonly Lock _ticketLock = new();
 
     private readonly AppDbContext _context;
+    private readonly
+    IHubContext<QueueHub>
+    _hub;
 
-    public TicketController(AppDbContext context)
+    public TicketController(
+     AppDbContext context,
+     IHubContext<QueueHub> hub)
     {
         _context = context;
+        _hub = hub;
     }
 
     [HttpPost]
@@ -81,6 +89,8 @@ public class TicketController : ControllerBase
                 DateTime.UtcNow;
 
             _context.SaveChanges();
+            _hub.Clients.All.SendAsync(
+    "QueueUpdated");
 
             return ticket;
         }
@@ -111,6 +121,8 @@ public class TicketController : ControllerBase
                 DateTime.UtcNow;
 
             _context.SaveChanges();
+            _hub.Clients.All.SendAsync(
+    "QueueUpdated");
 
             return ticket;
         }
@@ -139,6 +151,8 @@ public class TicketController : ControllerBase
                 TicketStatus.Cancelled;
 
             _context.SaveChanges();
+            _hub.Clients.All.SendAsync(
+    "QueueUpdated");
 
             return ticket;
         }
