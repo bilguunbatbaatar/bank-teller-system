@@ -39,16 +39,32 @@ public class TicketController : ControllerBase
         }
     }
 
-    [HttpPost("next")]
-    public ActionResult<Ticket> Next()
+    [HttpPost("next/{tellerNumber}")]
+    public ActionResult<Ticket>
+      Next(int tellerNumber)
     {
         lock (_ticketLock)
         {
-            var ticket = _context.Tickets
-                .OrderBy(x => x.Id)
-                .FirstOrDefault(x =>
-                    x.Status ==
-                    TicketStatus.Waiting);
+            var activeTicket =
+                _context.Tickets
+                    .Any(x =>
+                        x.Status ==
+                        TicketStatus.Called &&
+                        x.TellerNumber ==
+                        tellerNumber);
+
+            if (activeTicket)
+            {
+                return Conflict(
+                    $"Teller {tellerNumber} already has an active ticket.");
+            }
+
+            var ticket =
+                _context.Tickets
+                    .OrderBy(x => x.Id)
+                    .FirstOrDefault(x =>
+                        x.Status ==
+                        TicketStatus.Waiting);
 
             if (ticket == null)
             {
@@ -58,6 +74,9 @@ public class TicketController : ControllerBase
             ticket.Status =
                 TicketStatus.Called;
 
+            ticket.TellerNumber =
+                tellerNumber;
+
             ticket.CalledAt =
                 DateTime.UtcNow;
 
@@ -66,16 +85,19 @@ public class TicketController : ControllerBase
             return ticket;
         }
     }
-    [HttpPost("complete")]
-    public ActionResult<Ticket> Complete()
+    [HttpPost("complete/{tellerNumber}")]
+    public ActionResult<Ticket>
+     Complete(int tellerNumber)
     {
         lock (_ticketLock)
         {
-            var ticket = _context.Tickets
-                .OrderBy(x => x.Id)
-                .LastOrDefault(x =>
-                    x.Status ==
-                    TicketStatus.Called);
+            var ticket =
+                _context.Tickets
+                    .FirstOrDefault(x =>
+                        x.Status ==
+                        TicketStatus.Called &&
+                        x.TellerNumber ==
+                        tellerNumber);
 
             if (ticket == null)
             {
@@ -94,16 +116,19 @@ public class TicketController : ControllerBase
         }
     }
 
-    [HttpPost("cancel")]
-    public ActionResult<Ticket> Cancel()
+    [HttpPost("cancel/{tellerNumber}")]
+    public ActionResult<Ticket>
+     Cancel(int tellerNumber)
     {
         lock (_ticketLock)
         {
-            var ticket = _context.Tickets
-                .OrderBy(x => x.Id)
-                .LastOrDefault(x =>
-                    x.Status ==
-                    TicketStatus.Called);
+            var ticket =
+                _context.Tickets
+                    .FirstOrDefault(x =>
+                        x.Status ==
+                        TicketStatus.Called &&
+                        x.TellerNumber ==
+                        tellerNumber);
 
             if (ticket == null)
             {
@@ -120,19 +145,18 @@ public class TicketController : ControllerBase
     }
 
     [HttpGet("current")]
-    public ActionResult<Ticket> Current()
+    public ActionResult<List<Ticket>>
+     Current()
     {
-        var ticket = _context.Tickets
-            .OrderBy(x => x.Id)
-            .LastOrDefault(x =>
-                x.Status ==
-                TicketStatus.Called);
+        var tickets =
+            _context.Tickets
+                .Where(x =>
+                    x.Status ==
+                    TicketStatus.Called)
+                .OrderBy(x =>
+                    x.TellerNumber)
+                .ToList();
 
-        if (ticket == null)
-        {
-            return NotFound();
-        }
-
-        return ticket;
+        return tickets;
     }
 }
