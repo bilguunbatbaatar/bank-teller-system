@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
     public DbSet<Transaction> Transactions => Set<Transaction>();
 
     public DbSet<ExchangeRate> ExchangeRates => Set<ExchangeRate>();
+   
 
     public DbSet<Teller> Tellers => Set<Teller>();
 

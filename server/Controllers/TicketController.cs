@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
 using server.Data;
 using server.Enums;
 using server.Models;
-using Microsoft.AspNetCore.SignalR;
-using server.Hubs;
 
 namespace server.Controllers;
 
@@ -15,16 +14,11 @@ public class TicketController : ControllerBase
     private static readonly Lock _ticketLock = new();
 
     private readonly AppDbContext _context;
-    private readonly
-    IHubContext<QueueHub>
-    _hub;
 
     public TicketController(
-     AppDbContext context,
-     IHubContext<QueueHub> hub)
+        AppDbContext context)
     {
         _context = context;
-        _hub = hub;
     }
 
     [HttpPost]
@@ -32,9 +26,11 @@ public class TicketController : ControllerBase
     {
         lock (_ticketLock)
         {
-            var ticket = new Ticket();
+            var ticket =
+                new Ticket();
 
-            _context.Tickets.Add(ticket);
+            _context.Tickets
+                .Add(ticket);
 
             _context.SaveChanges();
 
@@ -49,7 +45,7 @@ public class TicketController : ControllerBase
 
     [HttpPost("next/{tellerNumber}")]
     public ActionResult<Ticket>
-      Next(int tellerNumber)
+        Next(int tellerNumber)
     {
         lock (_ticketLock)
         {
@@ -89,15 +85,14 @@ public class TicketController : ControllerBase
                 DateTime.UtcNow;
 
             _context.SaveChanges();
-            _hub.Clients.All.SendAsync(
-    "QueueUpdated");
 
             return ticket;
         }
     }
+
     [HttpPost("complete/{tellerNumber}")]
     public ActionResult<Ticket>
-     Complete(int tellerNumber)
+        Complete(int tellerNumber)
     {
         lock (_ticketLock)
         {
@@ -121,8 +116,6 @@ public class TicketController : ControllerBase
                 DateTime.UtcNow;
 
             _context.SaveChanges();
-            _hub.Clients.All.SendAsync(
-    "QueueUpdated");
 
             return ticket;
         }
@@ -130,7 +123,7 @@ public class TicketController : ControllerBase
 
     [HttpPost("cancel/{tellerNumber}")]
     public ActionResult<Ticket>
-     Cancel(int tellerNumber)
+        Cancel(int tellerNumber)
     {
         lock (_ticketLock)
         {
@@ -151,8 +144,6 @@ public class TicketController : ControllerBase
                 TicketStatus.Cancelled;
 
             _context.SaveChanges();
-            _hub.Clients.All.SendAsync(
-    "QueueUpdated");
 
             return ticket;
         }
@@ -160,7 +151,7 @@ public class TicketController : ControllerBase
 
     [HttpGet("current")]
     public ActionResult<List<Ticket>>
-     Current()
+        Current()
     {
         var tickets =
             _context.Tickets
