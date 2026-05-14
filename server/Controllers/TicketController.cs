@@ -44,7 +44,9 @@ public class TicketController : ControllerBase
                 .Add(ticket);
 
             _context.SaveChanges();
-
+            //ciruclar when it A999 restart from A001
+            var nextNumber =
+    ((_context.Tickets.Count() % 999) + 1);
             ticket.Number =
                 $"A{ticket.Id:000}";
 

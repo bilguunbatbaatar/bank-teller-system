@@ -7,7 +7,19 @@
         "Action": "StartWithoutDebugging"
       },
       {
+        "Path": "teller-app\\teller-app.csproj",
+        "Action": "StartWithoutDebugging"
+      },
+      {
+        "Path": "exchange-display\\exchange-display.csproj",
+        "Action": "StartWithoutDebugging"
+      },
+      {
         "Path": "queue-display\\queue-display.csproj",
+        "Action": "StartWithoutDebugging"
+      },
+      {
+        "Path": "terminal-app\\terminal-app.csproj",
         "Action": "StartWithoutDebugging"
       }
     ]

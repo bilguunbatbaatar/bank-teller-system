@@ -1,6 +1,7 @@
-﻿namespace server.Hubs
+﻿using Microsoft.AspNetCore.SignalR;
+
+namespace server.Hubs;
+
+public class ExchangeHub : Hub
 {
-    public class ExchangeHub
-    {
-    }
 }

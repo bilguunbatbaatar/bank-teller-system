@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
+using server.Hubs;
 
 using server.Data;
 using server.Models;
@@ -12,12 +14,17 @@ public class ExchangeController
     : ControllerBase
 {
     private readonly
+    IHubContext<ExchangeHub>
+    _hub;
+    private readonly
         AppDbContext _context;
 
     public ExchangeController(
-        AppDbContext context)
+      AppDbContext context,
+      IHubContext<ExchangeHub> hub)
     {
         _context = context;
+        _hub = hub;
     }
 
     [HttpGet]
@@ -34,11 +41,11 @@ public class ExchangeController
 
     [HttpPut("{currency}")]
     public async Task<
-        ActionResult<ExchangeRate>>
-        Update(
-            string currency,
-            decimal buyRate,
-            decimal sellRate)
+    ActionResult<ExchangeRate>>
+    Update(
+        string currency,
+        decimal buyRate,
+        decimal sellRate)
     {
         if (buyRate <= 0 ||
             sellRate <= 0)
@@ -46,12 +53,18 @@ public class ExchangeController
             return BadRequest();
         }
 
+        currency =
+            currency
+                .Trim()
+                .ToUpper();
+
         var rate =
             await _context
                 .ExchangeRates
                 .FirstOrDefaultAsync(
                     x =>
-                    x.CurrencyCode ==
+                    x.CurrencyCode
+                        .ToUpper() ==
                     currency);
 
         if (rate == null)
@@ -61,7 +74,6 @@ public class ExchangeController
                 {
                     CurrencyCode =
                         currency
-                            .ToUpper()
                 };
 
             _context
@@ -80,6 +92,13 @@ public class ExchangeController
 
         await _context
             .SaveChangesAsync();
+
+        Console.WriteLine(
+    "Broadcasting exchange update...");
+        await _hub.Clients
+            .All
+            .SendAsync(
+                "ExchangeUpdated");
 
         return rate;
     }

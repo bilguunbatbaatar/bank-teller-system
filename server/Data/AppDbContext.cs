@@ -29,6 +29,11 @@ public class AppDbContext : DbContext
             .HasIndex(x => x.AccountNumber)
             .IsUnique();
 
+        builder.Entity<ExchangeRate>()
+        .HasIndex(x =>
+        x.CurrencyCode)
+        .IsUnique();
+
         builder.Entity<Account>()
             .Property(x => x.Balance)
             .HasPrecision(18, 2);

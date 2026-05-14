@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
 using server.Services;
+using server.Hubs;
 using server.Data;
 
 var builder =
@@ -9,6 +11,10 @@ var builder =
 builder.Services
     .AddSingleton<
         QueueSocketService>();
+
+builder.Services
+    .AddSignalR();
+
 builder.Services
     .AddDbContext<AppDbContext>(
         options =>
@@ -33,8 +39,6 @@ builder.Services.AddCors(
 builder.Services
     .AddControllers();
 
-
-
 builder.Services
     .AddEndpointsApiExplorer();
 
@@ -43,6 +47,7 @@ builder.Services
 
 var app =
     builder.Build();
+
 app.Services
     .GetRequiredService<
         QueueSocketService>();
@@ -63,6 +68,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-
+app.MapHub<ExchangeHub>(
+    "/exchangeHub");
 
 app.Run();
