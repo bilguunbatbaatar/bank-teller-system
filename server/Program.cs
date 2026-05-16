@@ -4,6 +4,9 @@ using server.Services;
 using server.Hubs;
 using server.Data;
 
+/// <summary>
+/// Сервер програмын эхлэл цэг. Сервисүүдийг бүртгэж, HTTP дамжуулах хоолойг тохируулна.
+/// </summary>
 var builder =
     WebApplication.CreateBuilder(
         args);

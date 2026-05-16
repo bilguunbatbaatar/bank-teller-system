@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.SignalR;
 using server.Hubs;
@@ -8,6 +8,9 @@ using server.Models;
 
 namespace server.Controllers;
 
+/// <summary>
+/// Валютын ханшийн үйлдлүүдийг удирдах контроллер.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class ExchangeController
@@ -19,6 +22,11 @@ public class ExchangeController
     private readonly
         AppDbContext _context;
 
+    /// <summary>
+    /// ExchangeController-ийн шинэ хувилбарыг үүсгэнэ.
+    /// </summary>
+    /// <param name="context">Өгөгдлийн сангийн контекст.</param>
+    /// <param name="hub">SignalR hub контекст (мэдээлэл шинэчлэгдсэнийг мэдэгдэхэд ашиглана).</param>
     public ExchangeController(
       AppDbContext context,
       IHubContext<ExchangeHub> hub)
@@ -27,6 +35,10 @@ public class ExchangeController
         _hub = hub;
     }
 
+    /// <summary>
+    /// Бүх валютын ханшийн жагсаалтыг авна.
+    /// </summary>
+    /// <returns>Валютын ханшийн жагсаалт.</returns>
     [HttpGet]
     public async Task<
         List<ExchangeRate>>
@@ -39,6 +51,13 @@ public class ExchangeController
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Валютын ханшийг шинэчлэх эсвэл шинээр үүсгэнэ.
+    /// </summary>
+    /// <param name="currency">Валютын код.</param>
+    /// <param name="buyRate">Банкны авах ханш.</param>
+    /// <param name="sellRate">Банкны зарах ханш.</param>
+    /// <returns>Шинэчлэгдсэн валютын ханш.</returns>
     [HttpPut("{currency}")]
     public async Task<
     ActionResult<ExchangeRate>>

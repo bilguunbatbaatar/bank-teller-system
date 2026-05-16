@@ -5,6 +5,9 @@ namespace teller_app;
 using System.ComponentModel;
 using System.Text.Json;
 
+/// <summary>
+/// Банкны теллерийн үндсэн цонх. Очер удирдах болон банкны гүйлгээ хийх боломжтой.
+/// </summary>
 public partial class Form1 : Form
 {
     private readonly
@@ -35,6 +38,9 @@ public partial class Form1 : Form
             (int)cmbTeller
                 .SelectedItem!;
 
+    /// <summary>
+    /// Дараагийн очерын тасалбарыг дуудна.
+    /// </summary>
     private async void
         btnNext_Click(
             object sender,
@@ -49,6 +55,9 @@ public partial class Form1 : Form
         await LoadCurrent();
     }
 
+    /// <summary>
+    /// Тухайн тасалбарын үйлчилгээг дуусгана.
+    /// </summary>
     private async void
         btnComplete_Click(
             object sender,
@@ -64,6 +73,9 @@ public partial class Form1 : Form
         await LoadCurrent();
     }
 
+    /// <summary>
+    /// Тасалбарыг цуцална.
+    /// </summary>
     private async void
         btnCancel_Click(
             object sender,
@@ -77,6 +89,9 @@ public partial class Form1 : Form
         await LoadCurrent();
     }
 
+    /// <summary>
+    /// Одоогийн дуудагдсан байгаа тасалбарын мэдээллийг серверээс ачаална.
+    /// </summary>
     private async Task
     LoadCurrent()
     {
@@ -115,6 +130,9 @@ public partial class Form1 : Form
         { get; set; }
     }
 
+    /// <summary>
+    /// Дансны дугаараар хайлт хийж харилцагчийн мэдээллийг харуулна.
+    /// </summary>
     private async void
     btnSearch_Click(
         object sender,
@@ -172,6 +190,9 @@ public partial class Form1 : Form
                 "----";
         }
     }
+    /// <summary>
+    /// Данс хоорондын шилжүүлэг хийнэ.
+    /// </summary>
     private async void
     btnTransfer_Click(
         object sender,
@@ -212,6 +233,9 @@ public partial class Form1 : Form
             "Шилжүүлэг амжилттай.");
     }
 
+    /// <summary>
+    /// Дансанд бэлэн мөнгөний орлого хийнэ.
+    /// </summary>
     private async void
     btnDeposit_Click(
         object sender,
@@ -247,6 +271,9 @@ public partial class Form1 : Form
             "Мөнгө амжилттай нэмэгдлээ.");
     }
 
+    /// <summary>
+    /// Дансны гүйлгээний түүхийг харуулна.
+    /// </summary>
     private async void
     btnHistory_Click(
         object sender,
@@ -277,6 +304,9 @@ public partial class Form1 : Form
         gridHistory.DataSource =
             history;
     }
+    /// <summary>
+    /// Шинэ харилцагчийн данс үүсгэнэ.
+    /// </summary>
     private async void
     btnCreateAccount_Click(
         object sender,
@@ -324,6 +354,9 @@ public partial class Form1 : Form
             "Данс амжилттай үүслээ.");
     }
 
+    /// <summary>
+    /// Валютын ханшийг шинэчилнэ.
+    /// </summary>
     private async void
     btnUpdateRate_Click(
         object sender,
@@ -364,6 +397,9 @@ public partial class Form1 : Form
             "Ханш амжилттай шинэчлэгдлээ.");
     }
 
+    /// <summary>
+    /// Дансыг хаана.
+    /// </summary>
     private async void
     btnCloseAccount_Click(
         object sender,
@@ -400,6 +436,9 @@ public partial class Form1 : Form
             "----";
     }
 
+    /// <summary>
+    /// Данснаас бэлэн мөнгөний зарлага гаргана.
+    /// </summary>
     private async void
     btnWithdraw_Click(
         object sender,

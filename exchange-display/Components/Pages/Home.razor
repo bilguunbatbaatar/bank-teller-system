@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @implements IAsyncDisposable
 
@@ -39,6 +39,9 @@
     private List<ExchangeRate>
         rates = new();
 
+    /// <summary>
+    /// Хуудас ачаалагдах үед валютын ханшийг татаж, SignalR холболтыг тохируулна.
+    /// </summary>
     protected override async Task
         OnInitializedAsync()
     {
@@ -68,6 +71,9 @@
         await hub.StartAsync();
     }
 
+    /// <summary>
+    /// Серверээс хамгийн сүүлийн үеийн валютын ханшийг ачаална.
+    /// </summary>
     private async Task
         LoadRates()
     {
@@ -79,6 +85,9 @@
             ?? new();
     }
 
+    /// <summary>
+    /// Хуудсыг хаах үед SignalR холболтыг салгаж нөөцийг чөлөөлнө.
+    /// </summary>
     public async ValueTask
         DisposeAsync()
     {

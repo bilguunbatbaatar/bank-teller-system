@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Data;
 using server.DTOs;
@@ -7,6 +7,9 @@ using server.Models;
 
 namespace server.Controllers;
 
+/// <summary>
+/// Банкны гүйлгээний үйлдлүүдийг (орлого, зарлага, шилжүүлэг) удирдах контроллер.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class TransactionController : ControllerBase
@@ -15,12 +18,22 @@ public class TransactionController : ControllerBase
 
     private readonly AppDbContext _context;
 
+    /// <summary>
+    /// TransactionController-ийн шинэ хувилбарыг үүсгэнэ.
+    /// </summary>
+    /// <param name="context">Өгөгдлийн сангийн контекст.</param>
     public TransactionController(
         AppDbContext context)
     {
         _context = context;
     }
 
+    /// <summary>
+    /// Дансанд орлого хийнэ.
+    /// </summary>
+    /// <param name="accountNumber">Орлого хийх дансны дугаар.</param>
+    /// <param name="amount">Орлогын дүн.</param>
+    /// <returns>Гүйлгээний мэдээлэл.</returns>
     [HttpPost("deposit")]
     public ActionResult<Transaction>
         Deposit(string accountNumber,
@@ -72,6 +85,12 @@ public class TransactionController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Данснаас зарлага гаргана.
+    /// </summary>
+    /// <param name="accountNumber">Зарлага гаргах дансны дугаар.</param>
+    /// <param name="amount">Зарлагын дүн.</param>
+    /// <returns>Гүйлгээний мэдээлэл.</returns>
     [HttpPost("withdraw")]
     public ActionResult<Transaction>
         Withdraw(string accountNumber,
@@ -129,6 +148,11 @@ public class TransactionController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Хоёр дансны хооронд шилжүүлэг хийнэ.
+    /// </summary>
+    /// <param name="request">Шилжүүлгийн хүсэлтийн мэдээлэл.</param>
+    /// <returns>Гүйлгээний мэдээлэл.</returns>
     [HttpPost("transfer")]
     public ActionResult<Transaction>
         Transfer(TransferRequest request)
@@ -202,6 +226,11 @@ public class TransactionController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Тухайн дансны гүйлгээний түүхийг авна.
+    /// </summary>
+    /// <param name="accountNumber">Дансны дугаар.</param>
+    /// <returns>Гүйлгээний жагсаалт.</returns>
     [HttpGet("{accountNumber}/history")]
     public async Task<
         ActionResult<List<Transaction>>>

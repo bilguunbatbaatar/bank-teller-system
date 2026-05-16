@@ -1,9 +1,12 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
 namespace server.Services;
 
+/// <summary>
+/// Очерын мэдээллийг TCP сокетоор дамжуулах сервис.
+/// </summary>
 public class QueueSocketService
 {
     private readonly
@@ -11,6 +14,9 @@ public class QueueSocketService
         _clients =
             new();
 
+    /// <summary>
+    /// QueueSocketService-ийн шинэ хувилбарыг үүсгэж, сокет серверийг эхлүүлнэ.
+    /// </summary>
     public QueueSocketService()
     {
         Console.WriteLine(
@@ -20,6 +26,9 @@ public class QueueSocketService
             StartServer);
     }
 
+    /// <summary>
+    /// TCP серверийг 5000 порт дээр ажиллуулж, холболтуудыг хүлээн авна.
+    /// </summary>
     private async Task
         StartServer()
     {
@@ -50,6 +59,10 @@ public class QueueSocketService
         }
     }
 
+    /// <summary>
+    /// Холбогдсон бүх клиентүүд рүү (дэлгэцүүд рүү) мэдээлэл илгээнэ.
+    /// </summary>
+    /// <param name="message">Илгээх мессеж.</param>
     public async Task
         Broadcast(
             string message)

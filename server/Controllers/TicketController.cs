@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 using server.Services;
@@ -8,6 +8,9 @@ using server.Models;
 
 namespace server.Controllers;
 
+/// <summary>
+/// Очерын тасалбар болон теллерийн үйлчилгээг удирдах контроллер.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class TicketController : ControllerBase
@@ -23,6 +26,11 @@ public class TicketController : ControllerBase
         AppDbContext
         _context;
 
+    /// <summary>
+    /// TicketController-ийн шинэ хувилбарыг үүсгэнэ.
+    /// </summary>
+    /// <param name="context">Өгөгдлийн сангийн контекст.</param>
+    /// <param name="socket">Очерын мэдээллийг TCP-ээр дамжуулах сервис.</param>
     public TicketController(
         AppDbContext context,
         QueueSocketService socket)
@@ -31,6 +39,10 @@ public class TicketController : ControllerBase
         _socket = socket;
     }
 
+    /// <summary>
+    /// Шинэ очерын тасалбар үүсгэнэ.
+    /// </summary>
+    /// <returns>Үүсгэсэн тасалбарын мэдээлэл.</returns>
     [HttpPost]
     public ActionResult<Ticket>
         Create()
@@ -56,6 +68,11 @@ public class TicketController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Дараагийн хүлээгдэж буй тасалбарыг теллерт хуваарилна.
+    /// </summary>
+    /// <param name="tellerNumber">Тасалбар дуудаж буй теллерийн дугаар.</param>
+    /// <returns>Дуудагдсан тасалбарын мэдээлэл.</returns>
     [HttpPost("next/{tellerNumber}")]
     public ActionResult<Ticket>
         Next(int tellerNumber)
@@ -107,6 +124,11 @@ public class TicketController : ControllerBase
         return ticket;
     }
 
+    /// <summary>
+    /// Тасалбарын үйлчилгээг амжилттай дууссан төлөвт оруулна.
+    /// </summary>
+    /// <param name="tellerNumber">Теллерийн дугаар.</param>
+    /// <returns>Дууссан тасалбарын мэдээлэл.</returns>
     [HttpPost("complete/{tellerNumber}")]
     public ActionResult<Ticket>
         Complete(int tellerNumber)
@@ -142,6 +164,11 @@ public class TicketController : ControllerBase
         return ticket;
     }
 
+    /// <summary>
+    /// Тасалбарын үйлчилгээг цуцалсан төлөвт оруулна.
+    /// </summary>
+    /// <param name="tellerNumber">Теллерийн дугаар.</param>
+    /// <returns>Цуцлагдсан тасалбарын мэдээлэл.</returns>
     [HttpPost("cancel/{tellerNumber}")]
     public ActionResult<Ticket>
         Cancel(int tellerNumber)
@@ -174,6 +201,10 @@ public class TicketController : ControllerBase
         return ticket;
     }
 
+    /// <summary>
+    /// Одоо теллерүүд дээр дуудагдсан байгаа бүх тасалбаруудыг авна.
+    /// </summary>
+    /// <returns>Идэвхтэй тасалбаруудын жагсаалт.</returns>
     [HttpGet("current")]
     public ActionResult<List<Ticket>>
         Current()
@@ -190,6 +221,9 @@ public class TicketController : ControllerBase
         return tickets;
     }
 
+    /// <summary>
+    /// Очерын мэдээллийг TCP-ээр дамжуулж бүх дэлгэцүүдийг шинэчилнэ.
+    /// </summary>
     private void
         BroadcastQueue()
     {

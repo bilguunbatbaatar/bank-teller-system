@@ -2,6 +2,9 @@ using System.Net.Http.Json;
 
 namespace terminal_app;
 
+/// <summary>
+/// Харилцагчийн очерын тасалбар авах терминалын цонх.
+/// </summary>
 public partial class Form1 : Form
 {
     private readonly HttpClient _http =
@@ -16,6 +19,9 @@ public partial class Form1 : Form
                 "https://localhost:7174");
     }
 
+    /// <summary>
+    /// Очерын тасалбар авах товчлуур дээр дарахад шинэ тасалбар үүсгэж дугаарыг харуулна.
+    /// </summary>
     private async void btnTakeTicket_Click(
         object sender,
         EventArgs e)
@@ -53,6 +59,9 @@ public partial class Form1 : Form
     }
 }
 
+/// <summary>
+/// Серверээс ирэх тасалбарын хариу мэдээллийг төлөөлөх класс.
+/// </summary>
 public class TicketResponse
 {
     public string Number { get; set; }

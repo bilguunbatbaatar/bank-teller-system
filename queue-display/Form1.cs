@@ -3,6 +3,9 @@ using System.Text;
 
 namespace queue_display;
 
+/// <summary>
+/// Очерын мэдээллийг харуулах нийтийн дэлгэцийн цонх.
+/// </summary>
 public partial class Form1 : Form
 {
     private readonly TcpClient _client =
@@ -15,6 +18,9 @@ public partial class Form1 : Form
         Load += Form1_Load;
     }
 
+    /// <summary>
+    /// Цонх ачаалагдах үед сервертэй TCP холболт үүсгэж, мэдээллийг хүлээн авч эхэлнэ.
+    /// </summary>
     private async void Form1_Load(
         object? sender,
         EventArgs e)
@@ -57,6 +63,10 @@ public partial class Form1 : Form
         }
     }
 
+    /// <summary>
+    /// Серверээс ирсэн очерын мэдээллээр дэлгэц дээрх бичвэрүүдийг шинэчилнэ.
+    /// </summary>
+    /// <param name="message">Серверээс ирсэн очерын мэдээлэл.</param>
     private void UpdateLabels(
         string message)
     {
