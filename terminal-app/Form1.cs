@@ -4,29 +4,36 @@ namespace terminal_app;
 
 /// <summary>
 /// Харилцагчийн очерын тасалбар авах терминалын цонх.
+/// Энэ цонх нь REST API-аар дамжуулан шинэ тасалбар үүсгэж,
+/// харилцагчид дугаарыг харуулна.
 /// </summary>
 public partial class Form1 : Form
 {
-    private readonly HttpClient _http =
-        new HttpClient();
+    // REST API-тай харилцах HTTP клиент
+    private readonly HttpClient _http = new HttpClient();
 
+    /// <summary>
+    /// Конструктор: контролуудыг үүсгэж, HTTP клиентийн суурь хаягийг тохируулна.
+    /// </summary>
     public Form1()
     {
         InitializeComponent();
 
-        _http.BaseAddress =
-            new Uri(
-                "https://localhost:7174");
+        _http.BaseAddress = new Uri("https://localhost:7174");
     }
 
     /// <summary>
-    /// Очерын тасалбар авах товчлуур дээр дарахад шинэ тасалбар үүсгэж дугаарыг харуулна.
+    /// "Тасалбар авах" товч дарахад POST хүсэлт илгээж шинэ дугаар авна.
+    /// Хүсэлт явагдах хугацаанд товчийг идэвхгүй болгоно.
+    /// Амжилттай бол lblTicket-д дугаарыг харуулна.
+    /// Алдаа гарвал MessageBox мэдэгдэл өгнө.
     /// </summary>
     private async void btnTakeTicket_Click(
         object sender,
         EventArgs e)
     {
         btnTakeTicket.Enabled = false;
+        lblTicket.Text = "...";
 
         try
         {
@@ -36,21 +43,22 @@ public partial class Form1 : Form
                         "/api/ticket",
                         new { });
 
-            response
-                .EnsureSuccessStatusCode();
+            response.EnsureSuccessStatusCode();
 
             var ticket =
                 await response.Content
-                    .ReadFromJsonAsync<
-                        TicketResponse>();
+                    .ReadFromJsonAsync<TicketResponse>();
 
-            lblTicket.Text =
-                ticket!.Number;
+            lblTicket.Text = ticket!.Number;
         }
         catch
         {
+            lblTicket.Text = "---";
             MessageBox.Show(
-                "Server connection failed.");
+                "Server connection failed.",
+                "Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
         }
         finally
         {
@@ -64,6 +72,6 @@ public partial class Form1 : Form
 /// </summary>
 public class TicketResponse
 {
-    public string Number { get; set; }
-        = string.Empty;
+    /// <summary>Серверээс өгсөн тасалбарын дугаар. Жишээ: "A042"</summary>
+    public string Number { get; set; } = string.Empty;
 }
