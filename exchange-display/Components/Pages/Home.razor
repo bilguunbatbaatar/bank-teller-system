@@ -1,7 +1,239 @@
 ﻿@page "/"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@implements IAsyncDisposable
 
-<PageTitle>Home</PageTitle>
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.SignalR.Client
 
-<h1>Hello, world!</h1>
+<div class="screen">
 
-Welcome to your new app.
+    <div class="header">
+
+        <h1>BANK EXCHANGE RATES</h1>
+
+        <div class="datetime">
+            <div>DATE: @currentTime.ToString("dd MMM yyyy")</div>
+            <div>TIME: @currentTime.ToString("HH:mm:ss")</div>
+        </div>
+
+    </div>
+
+    <table class="exchange-board">
+
+        <thead>
+            <tr>
+                <th class="currency-header">CURRENCY</th>
+                <th class="buy-header">BUY</th>
+                <th class="sell-header">SELL</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var rate in rates)
+            {
+                <tr>
+                    <td class="currency">
+                        @rate.CurrencyCode
+                    </td>
+
+                    <td class="buy">
+                        @rate.BuyRate
+                    </td>
+
+                    <td class="sell">
+                        @rate.SellRate
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<style>
+
+    .screen {
+        min-height: 100vh;
+        background-image: linear-gradient( rgba(0,0,0,.65), rgba(0,0,0,.65)), url('/images/world-map.jpg');
+        background-size: cover;
+        background-position: center;
+        padding: 30px;
+        color: white;
+    }
+
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+
+    h1 {
+        font-size: 60px;
+        letter-spacing: 4px;
+        font-weight: bold;
+        text-shadow: 0 0 15px white;
+    }
+
+
+    .datetime {
+        font-size: 28px;
+        text-align: right;
+        line-height: 1.6;
+    }
+
+
+    .exchange-board {
+        width: 100%;
+        margin-top: 50px;
+        border-collapse: collapse;
+        text-align: center;
+        font-size: 42px;
+    }
+
+
+        .exchange-board th,
+        .exchange-board td {
+            padding: 20px;
+            border: 1px solid #00aaff;
+            background: rgba(0,0,0,.35);
+        }
+
+
+    .currency-header,
+    .currency {
+        color: #00aaff;
+        text-shadow: 0 0 12px #00aaff;
+    }
+
+
+    .buy-header,
+    .buy {
+        color: #00ff66;
+        text-shadow: 0 0 12px #00ff66;
+    }
+
+
+    .sell-header,
+    .sell {
+        color: gold;
+        text-shadow: 0 0 12px gold;
+    }
+</style>
+
+
+@code
+{
+    private readonly HttpClient _http = new();
+
+    private HubConnection? hub;
+
+    private PeriodicTimer? clockTimer;
+
+    private DateTime currentTime = DateTime.Now;
+
+    private List<ExchangeRate> rates = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _http.BaseAddress =
+            new Uri(
+                "https://localhost:7174");
+
+
+        await LoadRates();
+
+
+        _ = StartClock();
+
+
+        hub =
+            new HubConnectionBuilder()
+
+                .WithUrl(
+                    "https://localhost:7174/exchangeHub")
+
+                .WithAutomaticReconnect()
+
+                .Build();
+
+
+        hub.On(
+            "ExchangeUpdated",
+
+            async () =>
+            {
+                await LoadRates();
+
+                await InvokeAsync(
+                    StateHasChanged);
+            });
+
+
+        await hub.StartAsync();
+    }
+
+
+    private async Task StartClock()
+    {
+        clockTimer =
+            new PeriodicTimer(
+                TimeSpan.FromSeconds(1));
+
+
+        while (
+            await clockTimer
+                .WaitForNextTickAsync())
+        {
+            currentTime =
+                DateTime.Now;
+
+
+            await InvokeAsync(
+                StateHasChanged);
+        }
+    }
+
+
+    private async Task LoadRates()
+    {
+        rates =
+            await _http
+                .GetFromJsonAsync<
+                    List<ExchangeRate>>(
+                        "/api/exchange")
+
+            ?? new();
+    }
+
+
+    public async ValueTask DisposeAsync()
+    {
+        clockTimer?.Dispose();
+
+        if (hub is not null)
+        {
+            await hub.DisposeAsync();
+        }
+    }
+
+
+    public class ExchangeRate
+    {
+        public string CurrencyCode
+        { get; set; }
+            = string.Empty;
+
+
+        public decimal BuyRate
+        { get; set; }
+
+
+        public decimal SellRate
+        { get; set; }
+    }
+}
