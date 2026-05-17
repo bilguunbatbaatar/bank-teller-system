@@ -4,4 +4,5 @@
   <Project Path="server/server.csproj" />
   <Project Path="teller-app/teller-app.csproj" />
   <Project Path="terminal-app/terminal-app.csproj" />
+  <Project Path="Test/Test.csproj" />
 </Solution>
