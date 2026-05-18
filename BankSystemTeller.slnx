@@ -1,6 +1,8 @@
 <Solution>
   <Project Path="exchange-display/exchange-display.csproj" Id="1d4eca34-2794-4cc0-9b57-fdd0a3fb7ef3" />
+  <Project Path="queue-display/queue-display.csproj" />
   <Project Path="server/server.csproj" Id="3b5ffe4e-a3fe-4247-995b-f609ecd74734" />
   <Project Path="teller-app/teller-app.csproj" Id="2a0d10dc-bec7-4541-8b66-3516df2abe7f" />
   <Project Path="terminal-app/terminal-app.csproj" Id="b155a5ad-28cb-4447-a903-dfa094270948" />
+  <Project Path="Test/Test.csproj" />
 </Solution>

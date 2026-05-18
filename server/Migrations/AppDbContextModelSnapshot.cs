@@ -70,6 +70,9 @@ namespace server.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CurrencyCode")
+                        .IsUnique();
+
                     b.ToTable("ExchangeRates");
                 });
 
@@ -85,6 +88,9 @@ namespace server.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("TellerNumber")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -111,6 +117,9 @@ namespace server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("TellerNumber")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");

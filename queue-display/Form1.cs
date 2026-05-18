@@ -170,10 +170,12 @@ public partial class Form1 : Form
     /// <returns>Цэвэрлэсэн дугаарын мөр.</returns>
     private static string ExtractNumber(string line)
     {
-        var parts = line.Split(':', 2);
-        return parts.Length > 1 ? parts[1].Trim() : "---";
-    }
+        var parts = line.Split("=>", 2, StringSplitOptions.TrimEntries);
 
+        return parts.Length > 1
+            ? parts[1]
+            : "---";
+    }
     /// <summary>
     /// Цонхны арын дэвсгэрийг зурна:
     /// дээрх градиент цэнхэр зураас болон

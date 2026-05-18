@@ -1,35 +1,64 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
+using server.Services;
 using server.Data;
 using server.Enums;
 using server.Models;
 
 namespace server.Controllers;
 
+/// <summary>
+/// Очерын тасалбар болон теллерийн үйлчилгээг удирдах контроллер.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class TicketController : ControllerBase
 {
-    private static readonly Lock _ticketLock = new();
+    private static readonly Lock _ticketLock =
+        new();
 
-    private readonly AppDbContext _context;
+    private readonly
+        QueueSocketService
+        _socket;
 
-    public TicketController(AppDbContext context)
+    private readonly
+        AppDbContext
+        _context;
+
+    /// <summary>
+    /// TicketController-ийн шинэ хувилбарыг үүсгэнэ.
+    /// </summary>
+    /// <param name="context">Өгөгдлийн сангийн контекст.</param>
+    /// <param name="socket">Очерын мэдээллийг TCP-ээр дамжуулах сервис.</param>
+    public TicketController(
+        AppDbContext context,
+        QueueSocketService socket)
     {
         _context = context;
+        _socket = socket;
     }
 
+    /// <summary>
+    /// Шинэ очерын тасалбар үүсгэнэ.
+    /// </summary>
+    /// <returns>Үүсгэсэн тасалбарын мэдээлэл.</returns>
     [HttpPost]
-    public ActionResult<Ticket> Create()
+    public ActionResult<Ticket>
+        Create()
     {
         lock (_ticketLock)
         {
-            var ticket = new Ticket();
+            var ticket =
+                new Ticket();
 
-            _context.Tickets.Add(ticket);
+            _context.Tickets
+                .Add(ticket);
 
             _context.SaveChanges();
-
+            //ciruclar when it A999 restart from A001
+            var nextNumber =
+    ((_context.Tickets.Count() % 999) + 1);
             ticket.Number =
                 $"A{ticket.Id:000}";
 
@@ -39,16 +68,39 @@ public class TicketController : ControllerBase
         }
     }
 
-    [HttpPost("next")]
-    public ActionResult<Ticket> Next()
+    /// <summary>
+    /// Дараагийн хүлээгдэж буй тасалбарыг теллерт хуваарилна.
+    /// </summary>
+    /// <param name="tellerNumber">Тасалбар дуудаж буй теллерийн дугаар.</param>
+    /// <returns>Дуудагдсан тасалбарын мэдээлэл.</returns>
+    [HttpPost("next/{tellerNumber}")]
+    public ActionResult<Ticket>
+        Next(int tellerNumber)
     {
+        Ticket? ticket;
+
         lock (_ticketLock)
         {
-            var ticket = _context.Tickets
-                .OrderBy(x => x.Id)
-                .FirstOrDefault(x =>
-                    x.Status ==
-                    TicketStatus.Waiting);
+            var activeTicket =
+                _context.Tickets
+                    .Any(x =>
+                        x.Status ==
+                        TicketStatus.Called &&
+                        x.TellerNumber ==
+                        tellerNumber);
+
+            if (activeTicket)
+            {
+                return Conflict(
+                    $"Teller {tellerNumber} already has an active ticket.");
+            }
+
+            ticket =
+                _context.Tickets
+                    .OrderBy(x => x.Id)
+                    .FirstOrDefault(x =>
+                        x.Status ==
+                        TicketStatus.Waiting);
 
             if (ticket == null)
             {
@@ -58,24 +110,40 @@ public class TicketController : ControllerBase
             ticket.Status =
                 TicketStatus.Called;
 
+            ticket.TellerNumber =
+                tellerNumber;
+
             ticket.CalledAt =
                 DateTime.UtcNow;
 
             _context.SaveChanges();
-
-            return ticket;
         }
+
+        BroadcastQueue();
+
+        return ticket;
     }
-    [HttpPost("complete")]
-    public ActionResult<Ticket> Complete()
+
+    /// <summary>
+    /// Тасалбарын үйлчилгээг амжилттай дууссан төлөвт оруулна.
+    /// </summary>
+    /// <param name="tellerNumber">Теллерийн дугаар.</param>
+    /// <returns>Дууссан тасалбарын мэдээлэл.</returns>
+    [HttpPost("complete/{tellerNumber}")]
+    public ActionResult<Ticket>
+        Complete(int tellerNumber)
     {
+        Ticket? ticket;
+
         lock (_ticketLock)
         {
-            var ticket = _context.Tickets
-                .OrderBy(x => x.Id)
-                .LastOrDefault(x =>
-                    x.Status ==
-                    TicketStatus.Called);
+            ticket =
+                _context.Tickets
+                    .FirstOrDefault(x =>
+                        x.Status ==
+                        TicketStatus.Called &&
+                        x.TellerNumber ==
+                        tellerNumber);
 
             if (ticket == null)
             {
@@ -89,21 +157,33 @@ public class TicketController : ControllerBase
                 DateTime.UtcNow;
 
             _context.SaveChanges();
-
-            return ticket;
         }
+
+        BroadcastQueue();
+
+        return ticket;
     }
 
-    [HttpPost("cancel")]
-    public ActionResult<Ticket> Cancel()
+    /// <summary>
+    /// Тасалбарын үйлчилгээг цуцалсан төлөвт оруулна.
+    /// </summary>
+    /// <param name="tellerNumber">Теллерийн дугаар.</param>
+    /// <returns>Цуцлагдсан тасалбарын мэдээлэл.</returns>
+    [HttpPost("cancel/{tellerNumber}")]
+    public ActionResult<Ticket>
+        Cancel(int tellerNumber)
     {
+        Ticket? ticket;
+
         lock (_ticketLock)
         {
-            var ticket = _context.Tickets
-                .OrderBy(x => x.Id)
-                .LastOrDefault(x =>
-                    x.Status ==
-                    TicketStatus.Called);
+            ticket =
+                _context.Tickets
+                    .FirstOrDefault(x =>
+                        x.Status ==
+                        TicketStatus.Called &&
+                        x.TellerNumber ==
+                        tellerNumber);
 
             if (ticket == null)
             {
@@ -114,25 +194,54 @@ public class TicketController : ControllerBase
                 TicketStatus.Cancelled;
 
             _context.SaveChanges();
-
-            return ticket;
         }
-    }
 
-    [HttpGet("current")]
-    public ActionResult<Ticket> Current()
-    {
-        var ticket = _context.Tickets
-            .OrderBy(x => x.Id)
-            .LastOrDefault(x =>
-                x.Status ==
-                TicketStatus.Called);
-
-        if (ticket == null)
-        {
-            return NotFound();
-        }
+        BroadcastQueue();
 
         return ticket;
+    }
+
+    /// <summary>
+    /// Одоо теллерүүд дээр дуудагдсан байгаа бүх тасалбаруудыг авна.
+    /// </summary>
+    /// <returns>Идэвхтэй тасалбаруудын жагсаалт.</returns>
+    [HttpGet("current")]
+    public ActionResult<List<Ticket>>
+        Current()
+    {
+        var tickets =
+            _context.Tickets
+                .Where(x =>
+                    x.Status ==
+                    TicketStatus.Called)
+                .OrderBy(x =>
+                    x.TellerNumber)
+                .ToList();
+
+        return tickets;
+    }
+
+    /// <summary>
+    /// Очерын мэдээллийг TCP-ээр дамжуулж бүх дэлгэцүүдийг шинэчилнэ.
+    /// </summary>
+    private void
+        BroadcastQueue()
+    {
+        var message =
+            string.Join(
+                Environment.NewLine,
+                _context.Tickets
+                    .Where(x =>
+                        x.Status ==
+                        TicketStatus.Called)
+                    .OrderBy(x =>
+                        x.TellerNumber)
+                    .Select(x =>
+                        $"Teller {x.TellerNumber} => {x.Number}"));
+        
+        _socket
+            .Broadcast(
+                message)
+            .Wait();
     }
 }

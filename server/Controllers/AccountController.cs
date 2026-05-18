@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Data;
 using server.DTOs;
@@ -7,6 +7,9 @@ using server.Models;
 
 namespace server.Controllers;
 
+/// <summary>
+/// Банкны дансны үйлдлүүдийг (үүсгэх, хаах, хайх) удирдах контроллер.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class AccountController : ControllerBase
@@ -15,11 +18,20 @@ public class AccountController : ControllerBase
 
     private readonly AppDbContext _context;
 
+    /// <summary>
+    /// AccountController-ийн шинэ хувилбарыг үүсгэнэ.
+    /// </summary>
+    /// <param name="context">Өгөгдлийн сангийн контекст.</param>
     public AccountController(AppDbContext context)
     {
         _context = context;
     }
 
+    /// <summary>
+    /// Шинэ данс үүсгэнэ.
+    /// </summary>
+    /// <param name="request">Данс үүсгэх хүсэлтийн мэдээлэл.</param>
+    /// <returns>Үүсгэсэн дансны мэдээлэл.</returns>
     [HttpPost]
     public ActionResult<Account> Create(
         CreateAccountRequest request)
@@ -65,6 +77,10 @@ public class AccountController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Бүх идэвхтэй данснуудын жагсаалтыг авна.
+    /// </summary>
+    /// <returns>Идэвхтэй дансны жагсаалт.</returns>
     [HttpGet]
     public async Task<List<Account>> GetAll()
     {
@@ -74,6 +90,11 @@ public class AccountController : ControllerBase
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Дансны дугаараар дансны мэдээллийг хайна.
+    /// </summary>
+    /// <param name="accountNumber">Дансны дугаар.</param>
+    /// <returns>Олдсон дансны мэдээлэл.</returns>
     [HttpGet("{accountNumber}")]
     public async Task<ActionResult<Account>>
         GetByNumber(string accountNumber)
@@ -90,6 +111,11 @@ public class AccountController : ControllerBase
 
         return account;
     }
+    /// <summary>
+    /// Дансыг хаана (идэвхгүй төлөвт оруулна).
+    /// </summary>
+    /// <param name="accountNumber">Хаах дансны дугаар.</param>
+    /// <returns>Хаагдсан дансны мэдээлэл.</returns>
     [HttpPut("close/{accountNumber}")]
     public async Task<ActionResult<Account>>
     Close(string accountNumber)
